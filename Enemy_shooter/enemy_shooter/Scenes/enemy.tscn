@@ -1,0 +1,83 @@
+[gd_scene load_steps=8 format=3 uid="uid://uppqsuoml54r"]
+
+[ext_resource type="Script" path="res://scripts/enemy.gd" id="1_0h26s"]
+[ext_resource type="ArrayMesh" uid="uid://b2dvvjwhv22bo" path="res://View_detextion_shape.obj" id="1_eexgb"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_w6b1c"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_xxeop"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kw3yy"]
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_i5qwh"]
+points = PackedVector3Array(-0.493909, -1.00019, -1.48058, -0.493909, 0.99977, -1.48058, 0.493368, -1.00019, -1.48058, -2.43745, -2.1243, 3.26582, -2.43745, 2.1243, 3.26582, 0.493368, 0.99977, -1.48058, 2.43738, -2.1243, 3.26582, 2.43738, 2.1243, 3.26582)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qn3py"]
+size = Vector3(0.2, 0.2, 0.4)
+
+[node name="Enemy" type="CharacterBody3D"]
+collision_layer = 3
+collision_mask = 3
+script = ExtResource("1_0h26s")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+visible = false
+shape = SubResource("CapsuleShape3D_w6b1c")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("CapsuleMesh_xxeop")
+surface_material_override/0 = SubResource("StandardMaterial3D_kw3yy")
+
+[node name="enemy_FOV" type="Area3D" parent="."]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, -0.00400013)
+
+[node name="ViewDetextionShape" type="MeshInstance3D" parent="enemy_FOV"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0256735, -1.19209e-07, 1.97653)
+visible = false
+mesh = ExtResource("1_eexgb")
+skeleton = NodePath("../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="enemy_FOV"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0256735, -1.19209e-07, 1.97653)
+shape = SubResource("ConvexPolygonShape3D_i5qwh")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+path_desired_distance = 0.7
+path_height_offset = 0.1
+avoidance_enabled = true
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.446334, -0.584999)
+mesh = SubResource("BoxMesh_qn3py")
+
+[node name="Sight_timer" type="Timer" parent="."]
+wait_time = 0.2
+autostart = true
+
+[node name="FOV_cast" type="RayCast3D" parent="."]
+transform = Transform3D(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05, 0, 0.436775, 0)
+target_position = Vector3(0, -1, -105)
+debug_shape_custom_color = Color(1, 1, 1, 1)
+
+[node name="reset_guard_rotation" type="Node" parent="."]
+
+[node name="posted_guard_look_at" type="Marker3D" parent="reset_guard_rotation"]
+
+[node name="bullet_pos_node" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.450252, 0)
+
+[node name="bullet_pos" type="Marker3D" parent="bullet_pos_node"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.859935)
+
+[node name="Check_cover_ht" type="RayCast3D" parent="."]
+transform = Transform3D(3, 0, 0, 0, -1.31134e-07, -3, 0, 3, -1.31134e-07, 0, 0.514503, 0)
+debug_shape_custom_color = Color(0.601727, 0.672739, 1.15514e-06, 1)
+
+[node name="shoot_at_player_example" type="Timer" parent="."]
+
+[connection signal="body_entered" from="enemy_FOV" to="." method="_on_enemy_fov_body_entered"]
+[connection signal="body_exited" from="enemy_FOV" to="." method="_on_enemy_fov_body_exited"]
+[connection signal="target_reached" from="NavigationAgent3D" to="." method="_on_navigation_agent_3d_target_reached"]
+[connection signal="timeout" from="Sight_timer" to="." method="_on_timer_timeout"]
+[connection signal="timeout" from="shoot_at_player_example" to="." method="_on_shoot_at_player_example_timeout"]
